@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'providers/auth_provider.dart';
 import 'providers/product_provider.dart';
+import 'providers/category_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'pages/home_page.dart';
 import 'pages/shop_page.dart';
@@ -145,6 +146,9 @@ Future<void> main() async {
         ),
         ChangeNotifierProvider(
           create: (_) => ProductProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => CategoryProvider(),
         ),
       ],
       child: const MyApp(),

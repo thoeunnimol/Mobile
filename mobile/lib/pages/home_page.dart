@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/product_provider.dart';
+import '../providers/category_provider.dart';
 import '../main.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -14,9 +15,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch products when the screen is first loaded
+    // Fetch products and categories when the screen is first loaded
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProductProvider>().fetchProducts();
+      context.read<CategoryProvider>().fetchCategories();
     });
   }
 
@@ -24,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final productProvider = context.watch<ProductProvider>();
+    final categoryProvider = context.watch<CategoryProvider>();
     
     return Scaffold(
       body: CustomScrollView(
@@ -142,20 +145,58 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: theme.textTheme.titleMedium,
                   ),
                   const SizedBox(height: 16),
-                  SizedBox(
-                    height: 100,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        _buildCategoryCard(context, 'Electronics', Icons.electrical_services),
-                        _buildCategoryCard(context, 'Fashion', Icons.shopping_bag),
-                        _buildCategoryCard(context, 'Home', Icons.home),
-                        _buildCategoryCard(context, 'Sports', Icons.sports),
-                        _buildCategoryCard(context, 'Food', Icons.restaurant),
-                        _buildCategoryCard(context, 'Beauty', Icons.spa),
-                      ],
+                  if (categoryProvider.isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else if (categoryProvider.error.isNotEmpty)
+                    Center(child: Text(categoryProvider.error))
+                  else
+                    SizedBox(
+                      height: 100,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: categoryProvider.categories.map((category) {
+                          return Container(
+                            width: 100,
+                            margin: const EdgeInsets.only(right: 16),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    category.imageUrl,
+                                    width: 40,
+                                    height: 40,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Icon(
+                                        Icons.category,
+                                        size: 40,
+                                        color: theme.colorScheme.primary,
+                                      );
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  category.name,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -312,34 +353,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                 ],
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryCard(BuildContext context, String title, IconData icon) {
-    return Container(
-      width: 100,
-      margin: const EdgeInsets.only(right: 16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 32,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold,
             ),
           ),
         ],
