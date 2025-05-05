@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'providers/auth_provider.dart';
+import 'screens/auth/login_screen.dart';
 import 'pages/home_page.dart';
 import 'pages/shop_page.dart';
 import 'pages/cart_page.dart';
@@ -77,8 +80,16 @@ class ProductCard extends StatelessWidget {
   }
 }
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => AuthProvider(prefs),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -145,7 +156,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const MainScreen(),
+      home: Consumer<AuthProvider>(
+        builder: (context, auth, _) {
+          return auth.isAuthenticated ? const MainScreen() : const LoginScreen();
+        },
+      ),
     );
   }
 }
