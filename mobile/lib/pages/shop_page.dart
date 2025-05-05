@@ -1,12 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/product_provider.dart';
 import '../main.dart';
 
-class ShopScreen extends StatelessWidget {
+class ShopScreen extends StatefulWidget {
   const ShopScreen({super.key});
+
+  @override
+  State<ShopScreen> createState() => _ShopScreenState();
+}
+
+class _ShopScreenState extends State<ShopScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch products when the screen is first loaded
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProductProvider>().fetchProducts();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final productProvider = context.watch<ProductProvider>();
     
     return Scaffold(
       body: CustomScrollView(
@@ -94,13 +111,24 @@ class ShopScreen extends StatelessWidget {
               ),
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
+                  if (productProvider.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (productProvider.error.isNotEmpty) {
+                    return Center(child: Text(productProvider.error));
+                  }
+                  final product = productProvider.products[index];
                   return ProductCard(
-                    productName: 'Product ${index + 1}',
-                    price: '\$${(index + 1) * 99}',
-                    imageUrl: 'https://picsum.photos/200/200?random=$index',
+                    productName: product.name,
+                    price: '\$${product.price.toStringAsFixed(2)}',
+                    imageUrl: product.imageUrl,
                   );
                 },
-                childCount: 10, // Number of products to display
+                childCount: productProvider.isLoading
+                    ? 1
+                    : productProvider.error.isNotEmpty
+                        ? 1
+                        : productProvider.products.length,
               ),
             ),
           ),

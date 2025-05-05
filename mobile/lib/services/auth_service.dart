@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 
 class AuthService {
-  static const String baseUrl = ApiConfig.baseUrl;
+  static String get baseUrl => ApiConfig.baseUrl;
 
   Future<Map<String, dynamic>> register({
     required String name,
@@ -62,7 +62,11 @@ class AuthService {
     try {
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
         body: jsonEncode({
           'email': email,
           'password': password,
@@ -93,15 +97,12 @@ class AuthService {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
+          'Access-Control-Allow-Origin': '*',
         },
       );
 
       print('Logout response status: ${response.statusCode}'); // Debug log
       print('Logout response body: ${response.body}'); // Debug log
-
-      if (response.statusCode != 200) {
-        throw Exception('Failed to logout: ${response.body}');
-      }
     } catch (e) {
       print('Logout error: $e'); // Debug log
       rethrow;

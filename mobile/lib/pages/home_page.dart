@@ -1,12 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/product_provider.dart';
 import '../main.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch products when the screen is first loaded
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProductProvider>().fetchProducts();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final productProvider = context.watch<ProductProvider>();
     
     return Scaffold(
       body: CustomScrollView(
@@ -165,58 +182,28 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  SizedBox(
-                    height: 280,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: List.generate(5, (index) {
-                        return Container(
-                          width: 200,
-                          margin: const EdgeInsets.only(right: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.network(
-                                    'https://picsum.photos/200/200?random=$index',
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Product ${index + 1}',
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  const Icon(Icons.star, color: Colors.amber, size: 16),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '4.5',
-                                    style: theme.textTheme.bodySmall,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '\$${(index + 1) * 99}',
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  color: theme.colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
+                  if (productProvider.isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else if (productProvider.error.isNotEmpty)
+                    Center(child: Text(productProvider.error))
+                  else
+                    SizedBox(
+                      height: 280,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: productProvider.products.take(5).map((product) {
+                          return Container(
+                            width: 200,
+                            margin: const EdgeInsets.only(right: 16),
+                            child: ProductCard(
+                              productName: product.name,
+                              price: '\$${product.price.toStringAsFixed(2)}',
+                              imageUrl: product.imageUrl,
+                            ),
+                          );
+                        }).toList(),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -299,24 +286,30 @@ class HomeScreen extends StatelessWidget {
                     style: theme.textTheme.titleMedium,
                   ),
                   const SizedBox(height: 16),
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.75,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
+                  if (productProvider.isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else if (productProvider.error.isNotEmpty)
+                    Center(child: Text(productProvider.error))
+                  else
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.75,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                      ),
+                      itemCount: productProvider.products.length > 4 ? 4 : productProvider.products.length,
+                      itemBuilder: (context, index) {
+                        final product = productProvider.products[index];
+                        return ProductCard(
+                          productName: product.name,
+                          price: '\$${product.price.toStringAsFixed(2)}',
+                          imageUrl: product.imageUrl,
+                        );
+                      },
                     ),
-                    itemCount: 4,
-                    itemBuilder: (context, index) {
-                      return ProductCard(
-                        productName: 'Recent Product ${index + 1}',
-                        price: '\$${(index + 1) * 99}',
-                        imageUrl: 'https://picsum.photos/200/200?random=${index + 10}',
-                      );
-                    },
-                  ),
                 ],
               ),
             ),

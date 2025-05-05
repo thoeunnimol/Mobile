@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'providers/auth_provider.dart';
+import 'providers/product_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'pages/home_page.dart';
 import 'pages/shop_page.dart';
@@ -39,6 +40,58 @@ class ProductCard extends StatelessWidget {
                 imageUrl,
                 fit: BoxFit.cover,
                 width: double.infinity,
+                errorBuilder: (context, error, stackTrace) {
+                  print('Error loading image: $error'); // Debug log
+                  return Container(
+                    color: theme.colorScheme.surfaceVariant,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.image_not_supported,
+                            color: theme.colorScheme.onSurfaceVariant,
+                            size: 48,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Image not available',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  print('Loading image: ${loadingProgress.cumulativeBytesLoaded} / ${loadingProgress.expectedTotalBytes}'); // Debug log
+                  return Container(
+                    color: theme.colorScheme.surfaceVariant,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                                : null,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Loading image...',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -85,8 +138,15 @@ Future<void> main() async {
   final prefs = await SharedPreferences.getInstance();
   
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AuthProvider(prefs),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(prefs),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ProductProvider(),
+        ),
+      ],
       child: const MyApp(),
     ),
   );

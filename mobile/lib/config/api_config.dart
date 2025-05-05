@@ -1,7 +1,25 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show Platform;
+
 class ApiConfig {
-  // For local development with Laravel's built-in server
-  static const String baseUrl = 'http://127.0.0.1:8000';
+  // For web development
+  static const String webBaseUrl = 'http://127.0.0.1:8000';
   
-  // For production, uncomment and update this line with your actual domain
-  // static const String baseUrl = 'http://your-actual-domain.com';
+  // For Android emulator
+  static const String androidBaseUrl = 'http://10.0.2.2:8000';
+  
+  // For iOS simulator
+  static const String iosBaseUrl = 'http://127.0.0.1:8000';
+
+  // Get the appropriate base URL based on the platform
+  static String get baseUrl {
+    if (kIsWeb) {
+      return webBaseUrl;
+    } else if (Platform.isAndroid) {
+      return androidBaseUrl;
+    } else if (Platform.isIOS) {
+      return iosBaseUrl;
+    }
+    return webBaseUrl; // Default fallback
+  }
 } 
