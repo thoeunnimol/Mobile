@@ -68,71 +68,57 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // Hero Section (Banner)
+            // Hero Section
           SliverToBoxAdapter(
             child: Container(
-              height: 200,
-              margin: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                image: const DecorationImage(
-                  image: NetworkImage('https://picsum.photos/800/400'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: Stack(
+              padding: const EdgeInsets.all(16),
+              child: Row(
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black.withOpacity(0.3),
-                          Colors.black.withOpacity(0.7),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 20,
-                    left: 20,
-                    right: 20,
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Summer Sale',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            color: Colors.white,
+                          'Radiant Skin\nStarts Here',
+                          style: theme.textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Up to 50% off on selected items',
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: Colors.white,
-                          ),
-                        ),
                         const SizedBox(height: 16),
+                        Text(
+                          'Discover our premium skincare collection formulated with natural ingredients for your healthiest skin yet.',
+                          style: theme.textTheme.bodyLarge,
+                        ),
+                        const SizedBox(height: 24),
                         ElevatedButton(
                           onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: theme.colorScheme.primary,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('Shop Now'),
+                              const SizedBox(width: 8),
+                              Icon(Icons.arrow_forward),
+                            ],
                           ),
-                          child: const Text('Shop Now'),
                         ),
                       ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1887&q=80',
+                        fit: BoxFit.cover,
+                        height: 300,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-
           // Categories Section
           SliverToBoxAdapter(
             child: Padding(
