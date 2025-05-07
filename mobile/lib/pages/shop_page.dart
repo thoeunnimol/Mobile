@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/product_provider.dart';
+import '../providers/category_provider.dart';
 import '../main.dart';
 
 class ShopScreen extends StatefulWidget {
@@ -17,6 +18,7 @@ class _ShopScreenState extends State<ShopScreen> {
     // Fetch products when the screen is first loaded
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProductProvider>().fetchProducts();
+      context.read<CategoryProvider>().fetchCategories();
     });
   }
 
@@ -24,49 +26,27 @@ class _ShopScreenState extends State<ShopScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final productProvider = context.watch<ProductProvider>();
+       final categoryProvider = context.watch<CategoryProvider>();
     
     return Scaffold(
+     appBar: AppBar(
+        title: TextField(
+          decoration: InputDecoration(
+            hintText: 'Search products...',
+            hintStyle: TextStyle(color: Colors.white70),
+            border: InputBorder.none,
+            prefixIcon: Icon(Icons.search, color: Colors.white70),
+          ),
+          style: TextStyle(color: Colors.white),
+          onChanged: (query) {
+            // TODO: Implement search functionality
+            print('Search query: $query');
+          },
+        ),
+        backgroundColor: theme.colorScheme.primary,
+      ),
       body: CustomScrollView(
         slivers: [
-          // App Bar with Search
-          SliverAppBar(
-            floating: true,
-            pinned: true,
-            expandedHeight: 120,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                color: theme.colorScheme.primary,
-                padding: const EdgeInsets.only(top: 50, left: 16, right: 16),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Shop',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Search products...',
-                          prefixIcon: const Icon(Icons.search),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
 
           // Categories Section
           SliverToBoxAdapter(
@@ -80,25 +60,62 @@ class _ShopScreenState extends State<ShopScreen> {
                     style: theme.textTheme.titleMedium,
                   ),
                   const SizedBox(height: 16),
-                  SizedBox(
-                    height: 100,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        _buildCategoryCard(context, 'All', Icons.all_inclusive),
-                        _buildCategoryCard(context, 'Electronics', Icons.electrical_services),
-                        _buildCategoryCard(context, 'Fashion', Icons.shopping_bag),
-                        _buildCategoryCard(context, 'Home', Icons.home),
-                        _buildCategoryCard(context, 'Sports', Icons.sports),
-                        _buildCategoryCard(context, 'Beauty', Icons.spa),
-                      ],
+                  if (categoryProvider.isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else if (categoryProvider.error.isNotEmpty)
+                    Center(child: Text(categoryProvider.error))
+                  else
+                    SizedBox(
+                      height: 100,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: categoryProvider.categories.map((category) {
+                          return Container(
+                            width: 100,
+                            margin: const EdgeInsets.only(right: 16),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    category.imageUrl,
+                                    width: 40,
+                                    height: 40,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Icon(
+                                        Icons.category,
+                                        size: 40,
+                                        color: theme.colorScheme.primary,
+                                      );
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  category.name,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
           ),
-
           // Products Grid
           SliverPadding(
             padding: const EdgeInsets.all(16.0),
