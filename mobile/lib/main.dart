@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'providers/auth_provider.dart';
-import 'providers/product_provider.dart';
+import 'providers/product_provider.dart'; // Make sure this is imported
 import 'providers/category_provider.dart';
+import 'providers/cart_provider.dart'; // Make sure you've created this file
 import 'screens/auth/login_screen.dart';
 import 'pages/home_page.dart';
 import 'pages/shop_page.dart';
@@ -15,17 +16,28 @@ class ProductCard extends StatelessWidget {
   final String productName;
   final String price;
   final String imageUrl;
+  final Product product; // Add this line
 
   const ProductCard({
     super.key,
     required this.productName,
     required this.price,
     required this.imageUrl,
+    required this.product, // Add this line
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    
+    // Use Provider.of with listen: false and handle the case when it's not available
+    CartProvider? cartProvider;
+    try {
+      cartProvider = Provider.of<CartProvider>(context, listen: false);
+    } catch (e) {
+      print('CartProvider not found: $e');
+    }
+    
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -119,7 +131,31 @@ class ProductCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 ElevatedButton(
-                  onPressed: () {},
+                  // In the ElevatedButton's onPressed:
+                  onPressed: () {
+                    if (cartProvider != null) {
+                      cartProvider.addItem(product);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('$productName added to cart'),
+                          duration: const Duration(seconds: 2),
+                          action: SnackBarAction(
+                            label: 'UNDO',
+                            onPressed: () {
+                              cartProvider!.removeItem(product.id);
+                            },
+                          ),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Cart service not available'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 36),
                   ),
@@ -149,6 +185,9 @@ Future<void> main() async {
         ),
         ChangeNotifierProvider(
           create: (_) => CategoryProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => CartProvider(), // Make sure this is included
         ),
       ],
       child: const MyApp(),

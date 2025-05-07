@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
-import 'login_screen.dart';
+import '../screens/auth/login_screen.dart'; // Updated import path
 
 class AuthHomeScreen extends StatelessWidget {
   const AuthHomeScreen({Key? key}) : super(key: key);
@@ -31,4 +30,4 @@ class AuthHomeScreen extends StatelessWidget {
       ),
     );
   }
-} 
+}

@@ -135,10 +135,12 @@ class _ShopScreenState extends State<ShopScreen> {
                     return Center(child: Text(productProvider.error));
                   }
                   final product = productProvider.products[index];
+                  // In the products grid section
                   return ProductCard(
                     productName: product.name,
                     price: '\$${product.price.toStringAsFixed(2)}',
                     imageUrl: product.imageUrl,
+                    product: product, // Add this line
                   );
                 },
                 childCount: productProvider.isLoading
@@ -181,4 +183,4 @@ class _ShopScreenState extends State<ShopScreen> {
       ),
     );
   }
-} 
+}

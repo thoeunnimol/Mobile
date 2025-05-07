@@ -226,6 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               productName: product.name,
                               price: '\$${product.price.toStringAsFixed(2)}',
                               imageUrl: product.imageUrl,
+                              product: product, // Add this missing parameter
                             ),
                           );
                         }).toList(),
@@ -334,6 +335,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           productName: product.name,
                           price: '\$${product.price.toStringAsFixed(2)}',
                           imageUrl: product.imageUrl,
+                          product: product,
                         );
                       },
                     ),
@@ -372,4 +374,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-} 
+}
