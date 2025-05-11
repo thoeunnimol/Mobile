@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/product_provider.dart';
 import '../providers/category_provider.dart';
+import '../providers/auth_provider.dart';
+import '../screens/auth/login_screen.dart';  // Add this import
 import '../main.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -45,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     // Logo/App Name
                     Expanded(
                       child: Text(
-                        'ShopEase',
+                        'SkinCare',
                         style: theme.textTheme.titleLarge?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -58,9 +60,52 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () {},
                     ),
                     // Profile Avatar
-                    const CircleAvatar(
-                      radius: 16,
-                      backgroundImage: NetworkImage('https://i.pravatar.cc/150'),
+                    Consumer<AuthProvider>(
+                      builder: (context, authProvider, _) {
+                        return authProvider.isAuthenticated
+                            ? Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    authProvider.user?['name'] ?? 'User',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Tooltip(
+                                    message: authProvider.user?['name'] ?? 'User',
+                                    child: CircleAvatar(
+                                      radius: 16,
+                                      backgroundImage: authProvider.user?['profileImage'] != null
+                                          ? NetworkImage(authProvider.user!['profileImage']!)
+                                          : null,
+                                      child: authProvider.user?['profileImage'] == null
+                                          ? Text(
+                                              _getInitials(authProvider.user?['name'] ?? 'User'),
+                                              style: theme.textTheme.bodyMedium?.copyWith(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            )
+                                          : null,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                  );
+                                },
+                                child: const CircleAvatar(
+                                  radius: 16,
+                                  child: Icon(Icons.person),
+                                ),
+                              );
+                      },
                     ),
                   ],
                 ),
@@ -346,6 +391,13 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  String _getInitials(String name) {
+    if (name.isEmpty) return 'US';
+    final parts = name.split(' ');
+    if (parts.length == 1) return parts[0].substring(0, 2).toUpperCase();
+    return '${parts[0][0]}${parts.last[0]}'.toUpperCase();
   }
 
   Widget _buildTimerBox(String value, String label) {
