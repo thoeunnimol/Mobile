@@ -122,32 +122,72 @@ class ProfileScreen extends StatelessWidget {
 
               // Only show these sections if authenticated
               if (authProvider.isAuthenticated) ...[
-                // Orders Section
+                // Customer Information Section
                 _buildSection(
                   context,
-                  'My Orders',
+                  'Customer Information',
                   [
-                    _buildMenuItem(
-                      context,
-                      'Pending Orders',
-                      Icons.pending_actions,
-                      () {},
+                    ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.person,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      title: Text(
+                        'Name: ${authProvider.user?['name'] ?? 'Not provided'}',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ),
+                    ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.phone,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      title: Text(
+                        'Phone: ${authProvider.user?['phone'] ?? 'Not provided'}',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ),
+                    ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.email,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      title: Text(
+                        'Email: ${authProvider.user?['email'] ?? 'Not provided'}',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
                     ),
                     _buildMenuItem(
                       context,
-                      'Completed Orders',
-                      Icons.check_circle,
-                      () {},
-                    ),
-                    _buildMenuItem(
-                      context,
-                      'Cancelled Orders',
-                      Icons.cancel,
+                      'Customer Orders',
+                      Icons.shopping_bag,
                       () {},
                     ),
                   ],
                 ),
 
+              
                 // Settings Section
                 _buildSection(
                   context,
