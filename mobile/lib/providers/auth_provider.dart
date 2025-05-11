@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 import '../services/auth_service.dart';
 
 class AuthProvider with ChangeNotifier {
@@ -93,4 +96,43 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
     }
   }
-} 
+
+  // Add these to your AuthProvider class
+  List<Map<String, dynamic>> _userOrders = [];
+  List<Map<String, dynamic>> get userOrders => _userOrders;
+  
+  Future<void> fetchUserOrders() async {
+    try {
+      // Strict check for authenticated user with valid ID
+      if (!isAuthenticated || user?['id'] == null) {
+        _userOrders = []; // Clear any existing orders
+        notifyListeners();
+        return;
+      }
+
+      final response = await http.get(
+        Uri.parse('http://127.0.0.1:8000/api/customers/${user!['id']}/orders'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        // Ensure we only process orders for the current user
+        if (responseData['status'] == 'success') {
+          _userOrders = List<Map<String, dynamic>>.from(responseData['data']
+              .where((order) => order['customer_id'] == user!['id']));
+          notifyListeners();
+        }
+      } else if (response.statusCode == 404) {
+        _userOrders = []; // Clear orders if none found
+        notifyListeners();
+      }
+    } catch (error) {
+      debugPrint('Order fetch error: $error');
+      rethrow;
+    }
+  }
+}
