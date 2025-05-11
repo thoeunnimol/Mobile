@@ -15,7 +15,7 @@
                                         <div class="content-left">
                                             <span>Total Products</span>
                                             <div class="d-flex align-items-center my-1">
-                                                <h4 class="mb-0 me-2">0</h4>
+                                                <h4 class="mb-0 me-2">{{ $totalProducts }}</h4>
                                             </div>
                                         </div>
                                         <span class="badge bg-label-primary rounded p-2">
@@ -31,9 +31,9 @@
                                 <div class="card-body">
                                     <div class="d-flex align-items-start justify-content-between">
                                         <div class="content-left">
-                                            <span>Total Users</span>
+                                            <span>Total Customer</span>
                                             <div class="d-flex align-items-center my-1">
-                                                <h4 class="mb-0 me-2">0</h4>
+                                                <h4 class="mb-0 me-2">{{ $totalCustomers }}</h4>
                                             </div>
                                         </div>
                                         <span class="badge bg-label-success rounded p-2">
@@ -51,7 +51,7 @@
                                         <div class="content-left">
                                             <span>Total Orders</span>
                                             <div class="d-flex align-items-center my-1">
-                                                <h4 class="mb-0 me-2">0</h4>
+                                                <h4 class="mb-0 me-2">{{ $totalOrders }}</h4>
                                             </div>
                                         </div>
                                         <span class="badge bg-label-warning rounded p-2">
@@ -69,7 +69,7 @@
                                         <div class="content-left">
                                             <span>Total Revenue</span>
                                             <div class="d-flex align-items-center my-1">
-                                                <h4 class="mb-0 me-2">$0</h4>
+                                                <h4 class="mb-0 me-2">${{ number_format($totalRevenue, 2) }}</h4>
                                             </div>
                                         </div>
                                         <span class="badge bg-label-info rounded p-2">

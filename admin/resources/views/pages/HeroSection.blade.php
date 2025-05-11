@@ -4,21 +4,21 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title">Hero Sections</h4>
+                <h5 class="mb-0">Hero Section</h5>
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#heroSectionModal">
                         Add New Hero Section
                     </button>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-bordered">
+                        <table class="table ">
                             <thead>
                                 <tr>
-                                    <th>Page Name</th>
+                                    <th>Page</th>
                                     <th>Title</th>
                                     <th>Subtitle</th>
                                     <th>Image</th>
-                                    <th>Button Text</th>
+                                  
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -117,9 +117,7 @@
     </div>
 </div>
 
-@endsection
 
-@push('scripts')
 <script>
 let currentHeroSectionId = null;
 
@@ -142,7 +140,7 @@ function fetchHeroSections() {
                                 `<img src="/storage/${heroSection.image}" alt="${heroSection.title}" style="max-width: 100px;">` : 
                                 'No Image'}
                         </td>
-                        <td>${heroSection.button_text || '-'}</td>
+                  
                         <td>
                             <span class="badge bg-${heroSection.is_active ? 'success' : 'danger'}">
                                 ${heroSection.is_active ? 'Active' : 'Inactive'}
@@ -234,24 +232,42 @@ function showDeleteModal(id) {
 
 // Handle delete confirmation
 document.getElementById('confirmDelete').addEventListener('click', function() {
-    if (currentHeroSectionId) {
-        fetch(`/api/hero-sections/${currentHeroSectionId}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message) {
-                $('#deleteModal').modal('hide');
-                fetchHeroSections();
-            } else {
-                alert('Error: ' + (data.message || 'Failed to delete hero section'));
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
+    if (!currentHeroSectionId) return;
+
+    const deleteBtn = this;
+    const originalText = deleteBtn.innerHTML;
+    deleteBtn.disabled = true;
+    deleteBtn.innerHTML = `
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Deleting...
+    `;
+
+    fetch(`/api/hero-sections/${currentHeroSectionId}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Delete failed');
+        return response.json();
+    })
+    .then(data => {
+        $('#deleteModal').modal('hide');
+        fetchHeroSections();
+        currentHeroSectionId = null;
+        toastr.success('Hero section deleted successfully');
+    })
+    .catch(error => {
+        console.error('Delete error:', error);
+        toastr.error('Failed to delete hero section');
+    })
+    .finally(() => {
+        deleteBtn.disabled = false;
+        deleteBtn.innerHTML = originalText;
+    });
 });
 
 // Reset form
@@ -267,4 +283,3 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchHeroSections();
 });
 </script>
-@endpush 

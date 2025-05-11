@@ -262,7 +262,19 @@ class DashboardController extends Controller
             'Settings' => 'settings',
             default => 'dashboard',
         };
+    
+        // Add these lines to get dashboard stats
+        $totalProducts = Product::count();
+        $totalCustomers = Customer::count();
+        $totalOrders = Order::count();
+        $totalRevenue = Order::sum('total_amount');
         
-        return view('index', ['page' => $page]);
+        return view('index', [
+            'page' => $page,
+            'totalProducts' => $totalProducts,
+            'totalCustomers' => $totalCustomers,
+            'totalOrders' => $totalOrders,
+            'totalRevenue' => $totalRevenue
+        ]);
     }
 }

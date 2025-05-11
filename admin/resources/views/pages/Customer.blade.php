@@ -7,7 +7,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title">Customers</h4>
+                    <h5 class="mb-0">Customers</h5>
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#customerModal">
                         <i class="fas fa-plus"></i> Add New Customer
                     </button>
